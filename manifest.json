@@ -7,7 +7,7 @@
     "css": "",
     "author": "Cohee1207",
     "version": "1.0.0",
-    "homePage": "https://github.com/Cohee1207/Extension-MessageLimit",
+    "homePage": "https://github.com/SillyTavern/Extension-MessageLimit",
     "auto_update": true,
     "generate_interceptor": "MessageLimit_interceptGeneration"
 }
