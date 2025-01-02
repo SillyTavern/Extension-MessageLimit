@@ -90,7 +90,7 @@ function addSettings() {
     limitInput.value = String(settings.limit);
     limitInput.classList.add('text_pole');
     limitInput.addEventListener('input', () => {
-        settings.limit = Number(limitInput.value);
+        settings.limit = Math.max(0, Math.round(Number(limitInput.value)));
         context.saveSettingsDebounced();
     });
     inlineDrawerContent.append(parentSelectLabel, limitInput);
@@ -140,7 +140,7 @@ function addCommands() {
         returns: 'number',
         unnamedArgumentList: [
             SlashCommandArgument.fromProps({
-                description: 'Maximum number of messages to send.',
+                description: 'Maximum number of messages to send. Must be a positive integer or zero.',
                 typeList: ARGUMENT_TYPE.NUMBER,
                 isRequired: true,
                 acceptsMultiple: false,
@@ -152,7 +152,7 @@ function addCommands() {
                     throw new Error('Limit must be a finite number.');
                 }
 
-                context.extensionSettings[settingsKey].limit = Number(limit);
+                context.extensionSettings[settingsKey].limit = Math.max(0, Math.round(Number(limit)));
 
                 const input = document.getElementById('messageLimitValue');
                 if (input instanceof HTMLInputElement) {
