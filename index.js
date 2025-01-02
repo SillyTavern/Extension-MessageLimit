@@ -13,17 +13,29 @@ const settingsKey = 'messageLimit';
  * @type {MessageLimitSettings}
  * @typedef {Object} MessageLimitSettings
  * @property {boolean} enabled - Whether the extension is enabled.
+ * @property {boolean} quietPrompts - Whether to apply the message limit to quiet prompts.
  * @property {number} limit - Maximum number of messages to send.
  */
 const defaultSettings = Object.freeze({
     enabled: false,
+    quietPrompts: false,
     limit: 10,
 });
 
-globalThis.MessageLimit_interceptGeneration = function (chat) {
+/**
+ * Intercepts message generation to limit the number of messages.
+ * @param {object[]} chat Chat messages
+ * @param {number} _contextSize Context size (not used)
+ * @param {function} _abort Abort function (not used)
+ * @param {string} type Generation type
+ */
+globalThis.MessageLimit_interceptGeneration = function (chat, _contextSize, _abort, type) {
     /** @type {MessageLimitSettings} */
     const settings = context.extensionSettings[settingsKey];
     if (!settings.enabled) {
+        return;
+    }
+    if (type === 'quiet' && !settings.quietPrompts) {
         return;
     }
     while (chat.length > settings.limit) {
@@ -76,6 +88,26 @@ function addSettings() {
     enabledCheckboxText.textContent = context.t`Enabled`;
     enabledCheckboxLabel.append(enabledCheckbox, enabledCheckboxText);
     inlineDrawerContent.append(enabledCheckboxLabel);
+
+    // Apply to quiet prompts
+    const quietPromptsCheckboxLabel = document.createElement('label');
+    quietPromptsCheckboxLabel.classList.add('checkbox_label', 'marginBot5');
+    quietPromptsCheckboxLabel.htmlFor = 'messageLimitQuietPrompts';
+    const quietPromptsCheckbox = document.createElement('input');
+    quietPromptsCheckbox.id = 'messageLimitQuietPrompts';
+    quietPromptsCheckbox.type = 'checkbox';
+    quietPromptsCheckbox.checked = settings.quietPrompts;
+    quietPromptsCheckbox.addEventListener('change', () => {
+        settings.quietPrompts = quietPromptsCheckbox.checked;
+        context.saveSettingsDebounced();
+    });
+    const quietPromptsCheckboxText = document.createElement('span');
+    quietPromptsCheckboxText.textContent = context.t`Apply to background prompts`;
+    quietPromptsCheckboxLabel.title = context.t`Background prompts = extensions, /commands, etc.`;
+    const quietPromptsCheckboxTooltip = document.createElement('span');
+    quietPromptsCheckboxTooltip.classList.add('fa-solid', 'fa-circle-info', 'opacity50p');
+    quietPromptsCheckboxLabel.append(quietPromptsCheckbox, quietPromptsCheckboxText, quietPromptsCheckboxTooltip);
+    inlineDrawerContent.append(quietPromptsCheckboxLabel);
 
     // Limit
     const parentSelectLabel = document.createElement('label');
