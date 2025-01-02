@@ -34,6 +34,15 @@ Set the message limit. Just returns the current limit if no arguments are provid
 /ml-limit | /echo
 ```
 
+### `/ml-quiet`
+
+Enable or disable the message limit for background (quiet) prompts. Just returns the current state if no arguments are provided.
+
+```stscript
+// Summarize only the last 5 messages ||
+/ml-state on | /ml-limit 5 | /ml-quiet on | /summarize | /ml-state off
+```
+
 ## License
 
 AGPL-3.0

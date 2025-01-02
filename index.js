@@ -167,6 +167,41 @@ function addCommands() {
     }));
 
     SlashCommandParser.addCommandObject(SlashCommand.fromProps({
+        name: 'ml-quiet',
+        helpString: 'Change the message limit state for background (quiet) prompts. If no argument is provided, return the current state.',
+        returns: 'boolean',
+        unnamedArgumentList: [
+            SlashCommandArgument.fromProps({
+                description: 'Desired state of the message limit for background prompts.',
+                typeList: ARGUMENT_TYPE.STRING,
+                isRequired: true,
+                acceptsMultiple: false,
+                enumProvider: commonEnumProviders.boolean('onOffToggle'),
+            }),
+        ],
+        callback: (_, state) => {
+            if (state && typeof state === 'string') {
+                switch (String(state).trim().toLowerCase()) {
+                    case 'toggle':
+                    case 't':
+                        context.extensionSettings[settingsKey].quietPrompts = !context.extensionSettings[settingsKey].quietPrompts;
+                        break;
+                    default:
+                        context.extensionSettings[settingsKey].quietPrompts = isTrueBoolean(String(state));
+                }
+
+                const checkbox = document.getElementById('messageLimitQuietPrompts');
+                if (checkbox instanceof HTMLInputElement) {
+                    checkbox.checked = context.extensionSettings[settingsKey].quietPrompts;
+                    checkbox.dispatchEvent(new Event('input', { bubbles: true }));
+                }
+            }
+
+            return String(context.extensionSettings[settingsKey].quietPrompts);
+        },
+    }));
+
+    SlashCommandParser.addCommandObject(SlashCommand.fromProps({
         name: 'ml-limit',
         helpString: 'Set the maximum number of messages to send. If no argument is provided, return the current limit.',
         returns: 'number',
